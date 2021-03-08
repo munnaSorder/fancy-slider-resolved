@@ -4,6 +4,7 @@ const galleryHeader = document.querySelector('.gallery-header');
 const searchBtn = document.getElementById('search-btn');
 const sliderBtn = document.getElementById('create-slider');
 const sliderContainer = document.getElementById('sliders');
+const errorMessage = document.getElementById('error-message');
 // selected image 
 let sliders = [];
 
@@ -25,14 +26,22 @@ const showImages = (images) => {
     div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
     gallery.appendChild(div)
   })
+  
+  loadingSpinner();
 
 }
 
 const getImages = (query) => {
+  loadingSpinner();
   fetch(`https://pixabay.com/api/?key=${KEY}=${query}&image_type=photo&pretty=true`)
     .then(response => response.json())
-    .then(data => showImages(data.hits))
-    .catch(err => console.log(err))
+  .then(data => {
+    error(data.total);
+    showImages(data.hits);
+  })
+    .catch(err => {
+      console.log(err.message);
+    })
 }
 
 let slideIndex = 0;
@@ -141,3 +150,17 @@ function showResults() {
 sliderBtn.addEventListener('click', function () {
   createSlider()
 })
+
+const loadingSpinner = () => {
+  const spinner = document.getElementById('loading-spiner');
+  spinner.classList.toggle('d-block');
+  gallery.classList.toggle('d-none');
+}
+
+function error (data) {
+  if (data == 0) {
+    errorMessage.classList.remove('d-none');
+  }else{
+    errorMessage.classList.add('d-none');
+  }
+}
